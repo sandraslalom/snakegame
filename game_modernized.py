@@ -5,7 +5,11 @@ Snake Game - A classic snake game implementation using Pygame
 import sys
 import random
 import pygame
+<<<<<<< HEAD
 from sprites import Snake, Apple
+=======
+from archive.sprites import Snake, Apple
+>>>>>>> a28fd46 (updates after modernization)
 
 
 class SnakeGame:
@@ -180,4 +184,8 @@ def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     sys.exit(main())
+=======
+    sys.exit(main())
+>>>>>>> a28fd46 (updates after modernization)

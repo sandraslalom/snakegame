@@ -27,6 +27,7 @@ cd snakegame
 pip install -r requirements.txt
 ```
 
+<<<<<<< HEAD
 ## Usage
 
 Run the game:
@@ -40,6 +41,8 @@ python game_modernized.py
 - P: Pause/Resume the game
 - R: Restart the game (when game over)
 - ESC: Quit the game
+=======
+>>>>>>> a28fd46 (updates after modernization)
 
 ## Development
 
@@ -52,6 +55,27 @@ mv sprites_modernized.py sprites.py
 mv setup_modernized.py setup.py
 ```
 
+<<<<<<< HEAD
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+=======
+## Usage
+
+Run the game (after renaming and putting the old files to "archive" folder):
+```bash
+python game.py
+```
+
+## Controls
+
+- Arrow keys: Control the snake's direction
+- P: Pause/Resume the game
+- R: Restart the game (when game over)
+- ESC: Quit the game
+
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+>>>>>>> a28fd46 (updates after modernization)

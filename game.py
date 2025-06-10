@@ -1,116 +1,183 @@
-import pygame
-import pygame._view
-from pygame import *
-from sprites import Snake
-from sprites import Apple
+#!/usr/bin/env python3
+"""
+Snake Game - A classic snake game implementation using Pygame
+"""
+import sys
 import random
+import pygame
+from sprites import Snake, Apple
 
 
-pygame.init()
+class SnakeGame:
+    """Main game class that handles the game loop and game state"""
+    
+    # Game constants
+    DEFAULT_SCREEN_SIZE = (640, 480)
+    DEFAULT_UPDATE_SPEED = 100
+    BACKGROUND_COLOR = (0, 0, 0)  # Black
+    
+    def __init__(self):
+        """Initialize the game"""
+        pygame.init()
+        self.screen = pygame.display.set_mode(self.DEFAULT_SCREEN_SIZE)
+        pygame.display.set_caption('Snake')
+        
+        # Game state
+        self.is_running = True
+        self.is_game_over = False
+        self.is_paused = False
+        self.score = 0
+        self.direction = Snake.SnakeMove.RIGHT
+        
+        # Initialize game objects
+        self.snake = Snake(None, None, None)
+        self.apple = None
+        self.create_apple()
+        
+        # Timing control
+        self.clock = pygame.time.Clock()
+        self.update_time = pygame.time.get_ticks() + self.DEFAULT_UPDATE_SPEED
+    
+    def create_apple(self):
+        """Create a new apple at a random position not occupied by the snake"""
+        hlimit = (self.DEFAULT_SCREEN_SIZE[0] // Apple._DEFAULT_SIZE[0]) - 1
+        vlimit = (self.DEFAULT_SCREEN_SIZE[1] // Apple._DEFAULT_SIZE[1]) - 1
+        
+        position = [None, None]
+        while self.snake.occupies_position(position) or position[0] is None:
+            position[0] = random.randint(0, hlimit) * Apple._DEFAULT_SIZE[0]
+            position[1] = random.randint(0, vlimit) * Apple._DEFAULT_SIZE[1]
+        
+        self.apple = Apple(None, None, position)
+    
+    def handle_events(self):
+        """Process user input events"""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.is_running = False
+            
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_ESCAPE:
+                    self.is_running = False
+                elif event.key == pygame.K_p:
+                    self.is_paused = not self.is_paused
+                elif event.key == pygame.K_r and self.is_game_over:
+                    self.reset_game()
+                
+                # Direction controls (only when not paused and game not over)
+                if not self.is_paused and not self.is_game_over:
+                    if event.key == pygame.K_UP and self.direction != Snake.SnakeMove.DOWN:
+                        self.direction = Snake.SnakeMove.UP
+                    elif event.key == pygame.K_DOWN and self.direction != Snake.SnakeMove.UP:
+                        self.direction = Snake.SnakeMove.DOWN
+                    elif event.key == pygame.K_RIGHT and self.direction != Snake.SnakeMove.LEFT:
+                        self.direction = Snake.SnakeMove.RIGHT
+                    elif event.key == pygame.K_LEFT and self.direction != Snake.SnakeMove.RIGHT:
+                        self.direction = Snake.SnakeMove.LEFT
+    
+    def update(self):
+        """Update game state"""
+        if self.is_paused or self.is_game_over:
+            return
+            
+        current_time = pygame.time.get_ticks()
+        
+        if current_time >= self.update_time:
+            # Move snake
+            moved = self.snake.move(self.direction, self.DEFAULT_SCREEN_SIZE[0], self.DEFAULT_SCREEN_SIZE[1])
+            if not moved:
+                self.is_game_over = True
+            
+            # Check if snake ate the apple
+            if self.snake.occupies_position(self.apple.rect.topleft):
+                self.create_apple()
+                self.snake.lengthen_tail(1, self.direction)
+                self.score += 1
+                pygame.display.set_caption(f'Snake: {self.score}')
+            
+            # Update next update time
+            self.update_time = current_time + self.DEFAULT_UPDATE_SPEED
+    
+    def render(self):
+        """Render the game state to the screen"""
+        self.screen.fill(self.BACKGROUND_COLOR)
+        
+        # Render game objects
+        self.render_apple()
+        self.render_snake()
+        
+        # Render game over message if game is over
+        if self.is_game_over:
+            self.render_game_over()
+        
+        # Render pause message if game is paused
+        if self.is_paused and not self.is_game_over:
+            self.render_pause_message()
+            
+        pygame.display.update()
+    
+    def render_snake(self):
+        """Render the snake on the screen"""
+        self.screen.blit(self.snake.head.image, self.snake.head.rect)
+        for tile in self.snake.tail.tiles:
+            self.screen.blit(tile['image'], tile['rect'])
+    
+    def render_apple(self):
+        """Render the apple on the screen"""
+        self.screen.blit(self.apple.image, self.apple.rect)
+    
+    def render_game_over(self):
+        """Render game over message"""
+        font = pygame.font.SysFont('Arial', 30)
+        game_over_text = font.render(f'GAME OVER - Score: {self.score}', True, (255, 255, 255))
+        restart_text = font.render('Press R to restart', True, (255, 255, 255))
+        
+        text_rect = game_over_text.get_rect(center=(self.DEFAULT_SCREEN_SIZE[0] // 2, 
+                                                   self.DEFAULT_SCREEN_SIZE[1] // 2 - 20))
+        restart_rect = restart_text.get_rect(center=(self.DEFAULT_SCREEN_SIZE[0] // 2, 
+                                                    self.DEFAULT_SCREEN_SIZE[1] // 2 + 20))
+        
+        self.screen.blit(game_over_text, text_rect)
+        self.screen.blit(restart_text, restart_rect)
+        
+        pygame.display.set_caption(f'Snake: {self.score} - GAME OVER')
+    
+    def render_pause_message(self):
+        """Render pause message"""
+        font = pygame.font.SysFont('Arial', 30)
+        pause_text = font.render('PAUSED - Press P to resume', True, (255, 255, 255))
+        text_rect = pause_text.get_rect(center=(self.DEFAULT_SCREEN_SIZE[0] // 2, 
+                                               self.DEFAULT_SCREEN_SIZE[1] // 2))
+        self.screen.blit(pause_text, text_rect)
+    
+    def reset_game(self):
+        """Reset the game state to start a new game"""
+        self.is_game_over = False
+        self.score = 0
+        self.direction = Snake.SnakeMove.RIGHT
+        self.snake = Snake(None, None, None)
+        self.create_apple()
+        pygame.display.set_caption('Snake')
+    
+    def run(self):
+        """Main game loop"""
+        while self.is_running:
+            self.handle_events()
+            self.update()
+            self.render()
+            self.clock.tick(60)  # Cap at 60 FPS
+        
+        pygame.quit()
+        return self.score
 
 
-DEFAULT_SCREEN_SIZE = [640, 480]
-INITIAL_DIRECTION = Snake.SnakeMove.RIGHT
-DEFAULT_UPDATE_SPEED = 100
+def main():
+    """Main entry point for the game"""
+    game = SnakeGame()
+    final_score = game.run()
+    print(f"Final score: {final_score}")
+    return 0
 
 
-updatetime = pygame.time.get_ticks() + DEFAULT_UPDATE_SPEED
-
-
-#screen initialization
-screen = pygame.display.set_mode(DEFAULT_SCREEN_SIZE)
-display.set_caption('Snake')
-
-
-#sprite initialization
-snake = Snake(None, None, None)
-apple = None
-
-
-#renders the snake on screen
-def render_snake():
-    screen.blit(snake.head.image, snake.head.rect)
-    for count in range(len(snake.tail.tiles)):
-        screen.blit(snake.tail.tiles[count]['image']
-            , snake.tail.tiles[count]['rect'])
-
-
-#creates a new apple
-def create_apple():
-    global apple
-    global snake
-
-
-    hlimit = (DEFAULT_SCREEN_SIZE[0]/Apple._DEFAULT_SIZE[0])-1
-    vlimit = (DEFAULT_SCREEN_SIZE[1]/Apple._DEFAULT_SIZE[1])-1
-    X, Y = None, None
-
-
-    while snake.occupies_position([X, Y]) == True:
-        X = random.randint(0, hlimit)*Apple._DEFAULT_SIZE[0]
-        Y = random.randint(0, vlimit)*Apple._DEFAULT_SIZE[1]
-    apple = Apple(None, None, [X, Y])
-
-
-#renders the apple on screen
-def render_apple():
-    global apple
-    screen.blit(apple.image, apple.rect)
-
-
-is_done = False #signifies escape from game
-is_over = False #signifies end of game by game rules
-direction = None
-score = 0
-create_apple()
-
-
-while is_done == False:
-    screen.fill(0) #color screen black
-    global direction
-    if direction == None:
-        direction = INITIAL_DIRECTION
-
-
-    #checks for changes in direction and validates it
-    for e in event.get():
-        if e.type == KEYUP:
-            if e.key == K_ESCAPE:
-                is_done = True
-            elif e.key == K_UP:
-                if direction != Snake.SnakeMove.DOWN:
-                    direction = Snake.SnakeMove.UP
-            elif e.key == K_DOWN:
-                if direction != Snake.SnakeMove.UP:
-                    direction = Snake.SnakeMove.DOWN
-            elif e.key == K_RIGHT:
-                if direction != Snake.SnakeMove.LEFT:
-                    direction = Snake.SnakeMove.RIGHT
-            elif e.key == K_LEFT:
-                if direction != Snake.SnakeMove.RIGHT:
-                    direction = Snake.SnakeMove.LEFT
-
-
-    #updates the display
-    currenttime = pygame.time.get_ticks()
-    global updatetime
-    global is_over
-    if is_over == False:
-        if currenttime >= updatetime:
-            moved = snake.move(direction, DEFAULT_SCREEN_SIZE[0], DEFAULT_SCREEN_SIZE[1])
-            if moved == False:
-                is_over = True
-            if snake.occupies_position(apple.rect.topleft) == True:
-                create_apple()
-                snake.lengthen_tail(1, direction)
-                global score
-                score += 1
-                display.set_caption('Snake: ' + str(score))
-
-
-            render_apple()
-            render_snake()
-            pygame.display.update()
-            updatetime += DEFAULT_UPDATE_SPEED
-    else:
-        display.set_caption('Snake: ' + str(score) + ' GAME OVER')
+if __name__ == "__main__":
+    sys.exit(main())
