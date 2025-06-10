@@ -27,20 +27,6 @@ cd snakegame
 pip install -r requirements.txt
 ```
 
-## Usage
-
-Run the game:
-```bash
-python game_modernized.py
-```
-
-## Controls
-
-- Arrow keys: Control the snake's direction
-- P: Pause/Resume the game
-- R: Restart the game (when game over)
-- ESC: Quit the game
-
 ## Development
 
 This project has been modernized to follow current Python and Pygame best practices. The modernized files have the `_modernized` suffix.
@@ -51,6 +37,20 @@ mv game_modernized.py game.py
 mv sprites_modernized.py sprites.py
 mv setup_modernized.py setup.py
 ```
+## Usage
+
+Run the game (after installing the dependencies, renaming the files and putting the old files into the folder "archive"):
+```bash
+python game.py
+```
+
+## Controls
+
+- Arrow keys: Control the snake's direction
+- P: Pause/Resume the game
+- R: Restart the game (when game over)
+- ESC: Quit the game
+
 
 ## License
 
