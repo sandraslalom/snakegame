@@ -180,8 +180,4 @@ def main():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     sys.exit(main())
-=======
-    sys.exit(main())
->>>>>>> a28fd46 (updates after modernization)

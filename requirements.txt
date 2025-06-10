@@ -1,6 +1,2 @@
 pygame>=2.0.0
-<<<<<<< HEAD
 setuptools>=42.0.0
-=======
-setuptools>=42.0.0
->>>>>>> a28fd46 (updates after modernization)
