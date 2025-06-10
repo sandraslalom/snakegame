@@ -5,11 +5,7 @@ Snake Game - A classic snake game implementation using Pygame
 import sys
 import random
 import pygame
-<<<<<<< HEAD
 from sprites import Snake, Apple
-=======
-from archive.sprites import Snake, Apple
->>>>>>> a28fd46 (updates after modernization)
 
 
 class SnakeGame:
